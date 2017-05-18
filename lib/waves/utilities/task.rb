@@ -12,44 +12,12 @@ module WavesUtilities
       Task.all_task_types.find { |t| t[1] == @key }[0]
     end
 
-    def declarations_required_on_create?
-      [
-        :new_registration, :provisional, :re_registration, :renewal
-      ].include?(@key)
-    end
-
-    def declarations_required_on_add_owner?
-      return true if declarations_required_on_create?
-      [:change_owner].include?(@key)
-    end
-
-    def electronic_delivery_available?
-      [:current_transcript, :historic_transcript].include?(@key)
-    end
-
-    def ownership_can_be_changed?
-      [
-        :new_registration, :provisional, :change_owner, :renewal,
-        :re_registration, :manual_override
-      ].include?(@key)
-    end
-
-    def address_can_be_changed?
-      ownership_can_be_changed? || @key == :change_address
-    end
-
-    def vessel_can_be_edited?
-      [
-        :new_registration, :provisional, :change_vessel, :renewal,
-         :re_registration, :manual_override
-      ].include?(@key)
-    end
-
-    def payment_required?
-      ![
-        :change_address, :closure, :enquiry, :termination_notice,
-        :registrar_closure, :registrar_restores_closure, :issue_csr,
-        :manual_override].include?(@key)
+    def method_missing(m, *args, &block)
+      if m.match(/.*\?/)
+        processes.include?(m.to_s.gsub("?", "").to_sym)
+      else
+        super
+      end
     end
 
     def print_job_templates
@@ -68,70 +36,111 @@ module WavesUtilities
       end
     end
 
-    def prints_certificate?
-      [
-        :new_registration, :change_owner, :change_vessel, :renewal,
-        :duplicate_certificate, :re_registration
-      ].include?(@key)
-    end
+    # def declarations_required_on_create?
+    #   [
+    #     :new_registration, :provisional, :re_registration, :renewal
+    #   ].include?(@key)
+    # end
 
-    def prints_provisional_certificate?
-      [:provisional].include?(@key)
-    end
+    # def declarations_required_on_add_owner?
+    #   return true if declarations_required_on_create?
+    #   [:change_owner].include?(@key)
+    # end
 
-    def prints_current_transcript?
-      [:closure, :current_transcript].include?(@key)
-    end
+    # def electronic_delivery_available?
+    #   [:current_transcript, :historic_transcript].include?(@key)
+    # end
 
-    def prints_historic_transcript?
-      [:historic_transcript].include?(@key)
-    end
+    # def ownership_can_be_changed?
+    #   [
+    #     :new_registration, :provisional, :change_owner, :renewal,
+    #     :re_registration, :manual_override
+    #   ].include?(@key)
+    # end
 
-    def duplicates_certificate?
-      [:duplicate_certificate].include?(@key)
-    end
+    # def address_can_be_changed?
+    #   ownership_can_be_changed? || @key == :change_address
+    # end
 
-    def renews_certificate?
-      [:change_owner, :change_vessel, :renewal, :re_registration]
-        .include?(@key)
-    end
+    # def vessel_can_be_edited?
+    #   [
+    #     :new_registration, :provisional, :change_vessel, :renewal,
+    #      :re_registration, :manual_override
+    #   ].include?(@key)
+    # end
 
-    def builds_registry?
-      [
-        :change_owner, :change_vessel, :change_address,
-        :re_registration, :new_registration, :provisional, :renewal,
-        :manual_override, :mortgage].include?(@key)
-    end
+    # def payment_required?
+    #   ![
+    #     :change_address, :closure, :enquiry, :termination_notice,
+    #     :registrar_closure, :registrar_restores_closure, :issue_csr,
+    #     :manual_override].include?(@key)
+    # end
 
-    def builds_registration?
-      [
-        :change_owner, :change_vessel, :provisional,
-        :re_registration, :new_registration, :renewal].include?(@key)
-    end
 
-    def emails_application_approval?
-      [
-        :new_registration, :renewal, :re_registration, :provisional,
-        :change_owner, :change_vessel, :change_address,
-        :closure, :current_transcript, :historic_transcript,
-        :mortgage].include?(@key)
-    end
+    # def prints_certificate?
+    #   [
+    #     :new_registration, :change_owner, :change_vessel, :renewal,
+    #     :duplicate_certificate, :re_registration
+    #   ].include?(@key)
+    # end
 
-    def emails_application_receipt?
-      [
-        :new_registration, :renewal, :re_registration, :provisional,
-        :change_owner, :change_vessel, :change_address,
-        :closure, :current_transcript, :historic_transcript,
-        :duplicate_certificate, :enquiry, :mortgage].include?(@key)
-    end
+    # def prints_provisional_certificate?
+    #   [:provisional].include?(@key)
+    # end
 
-    def referrable?
-      ![:manual_override].include?(@key)
-    end
+    # def prints_current_transcript?
+    #   [:closure, :current_transcript].include?(@key)
+    # end
 
-    def issues_csr?
-      [:issue_csr].include?(@key)
-    end
+    # def prints_historic_transcript?
+    #   [:historic_transcript].include?(@key)
+    # end
+
+    # def duplicates_certificate?
+    #   [:duplicate_certificate].include?(@key)
+    # end
+
+    # def renews_certificate?
+    #   [:change_owner, :change_vessel, :renewal, :re_registration]
+    #     .include?(@key)
+    # end
+
+    # def builds_registry?
+    #   [
+    #     :change_owner, :change_vessel, :change_address,
+    #     :re_registration, :new_registration, :provisional, :renewal,
+    #     :manual_override, :mortgage].include?(@key)
+    # end
+
+    # def builds_registration?
+    #   [
+    #     :change_owner, :change_vessel, :provisional,
+    #     :re_registration, :new_registration, :renewal].include?(@key)
+    # end
+
+    # def emails_application_approval?
+    #   [
+    #     :new_registration, :renewal, :re_registration, :provisional,
+    #     :change_owner, :change_vessel, :change_address,
+    #     :closure, :current_transcript, :historic_transcript,
+    #     :mortgage].include?(@key)
+    # end
+
+    # def emails_application_receipt?
+    #   [
+    #     :new_registration, :renewal, :re_registration, :provisional,
+    #     :change_owner, :change_vessel, :change_address,
+    #     :closure, :current_transcript, :historic_transcript,
+    #     :duplicate_certificate, :enquiry, :mortgage].include?(@key)
+    # end
+
+    # def referrable?
+    #   ![:manual_override].include?(@key)
+    # end
+
+    # def issues_csr?
+    #   [:issue_csr].include?(@key)
+    # end
 
     class << self
       def finance_task_types
